@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    image: melquiadesrodrigues/php-compose:8.0.1-fpm-alpine3.13
     container_name: app
     entrypoint: dockerize -template ./.docker/app/.env.template:.env  ./.docker/app/entrypoint.sh
     environment:
