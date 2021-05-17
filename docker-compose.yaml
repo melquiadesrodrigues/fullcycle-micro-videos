@@ -2,28 +2,28 @@ version: '3.8'
 
 services:
   app:
-    image: melquiadesrodrigues/php-compose:8.0.1-fpm-alpine3.13
-    container_name: app
-    entrypoint: dockerize -template ./.docker/app/.env.template:.env  ./.docker/app/entrypoint.sh
+    image: melquiadesrodrigues/php-compose:8.0.6-fpm-alpine3.13
+    container_name: micro-videos-app
+    entrypoint: dockerize -template ./.docker/app/.env.template:.env -wait tcp://mysql:3306 -timeout 40s ./.docker/app/entrypoint.sh
     environment:
-      MYSQL_HOST: "mysql"
-      MYSQL_PORT: "3306"
-      MYSQL_DATABASE: "laravel"
-      MYSQL_USERNAME: "root"
-      MYSQL_PASSWORD: "12345"
-      REDIS_HOST: "redis"
-      REDIS_PORT: "6379"
+      _DB_HOST: "mysql"
+      _DB_DATABASE: "code_micro_videos"
+      _DB_USERNAME: "root"
+      _DB_PASSWORD: "12345"
+    #  XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9001 remote_enable=1 xdebug.remote_autostart=1 remote_handler=dbgp xdebug.remote_log=/var/log/xdebug.log
+    ports:
+      - "9001:9001"
     volumes:
       - .:/var/www
     networks:
-      - app-newtork
+      - codeflix-micro-videos
     depends_on:
       - mysql
       - redis
 
   nginx:
     build: .docker/nginx
-    container_name: nginx
+    container_name: micro-videos-nginx
     restart: always
     tty: true
     ports:
@@ -35,14 +35,14 @@ services:
       PHP_HOST: "app"
       PHP_PORT: "9000"
     networks:
-      - app-newtork
+      - codeflix-micro-videos
     depends_on:
       - app
 
   mysql:
     build: ./.docker/mysql
     command: --innodb-use-native-aio=0
-    container_name: mysql
+    container_name: micro-videos-mysql
     restart: always
     tty: true
     ports:
@@ -50,20 +50,19 @@ services:
     volumes:
       - ./.docker/mysql/dbdata:/var/lib/mysql
     environment:
-      MYSQL_DATABASE: 'laravel'
+      MYSQL_DATABASE: 'code_micro_videos'
       MYSQL_ROOT_PASSWORD: '12345'
-      MYSQL_USER: 'root'
     networks:
-      - app-newtork
+      - codeflix-micro-videos
 
   redis:
      image: redis:alpine
-     container_name: redis
+     container_name: micro-videos-redis
      expose:
        - 6379
      networks:
-       - app-newtork
+       - codeflix-micro-videos
 
 networks:
-  app-newtork:
+  codeflix-micro-videos:
     driver: bridge
