@@ -2,19 +2,18 @@
 
 namespace Database\Factories;
 
-use App\Models\Category;
+use App\Models\Genre;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use JetBrains\PhpStorm\ArrayShape;
 
-class CategoryFactory extends Factory
+class GenreFactory extends Factory
 {
-    protected $model = Category::class;
+    protected $model = Genre::class;
 
     #[ArrayShape(['name' => "string", 'description' => "null|string"])] public function definition(): array
     {
         return [
             'name' => $this->faker->colorName,
-            'description' => rand(1, 10) % 2 == 0 ? $this->faker->sentence() : null
         ];
     }
 }
