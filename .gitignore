@@ -4,10 +4,10 @@
 /public/storage
 /storage/*.key
 /vendor
-.env
-.env.phpunit
-.env.backup
-.phpunit.result.cache
+/.env
+/.env.phpunit
+/.env.backup
+/.phpunit.result.cache
 Homestead.json
 Homestead.yaml
 npm-debug.log
