@@ -1,65 +1,69 @@
 <?php
 
-namespace Tests\Unit\Models;
+namespace Tests\Feature\Models;
 
 use App\Models\Category;
-use App\Models\Traits\Uuid;
-use App\Models\Traits\Writable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
 
 class CategoryTest extends TestCase
 {
+    use DatabaseMigrations;
+    
     private Category $category;
 
-    protected function setUp(): void
+    public function testList()
     {
-        parent::setUp();
-        $this->category = new Category();
+        Category::factory(1)->create();
+        $categories = Category::all();
+        $this->assertCount(1, $categories);
+        $categoryKeys = array_keys($categories->first()->getAttributes());
+        $expectedKeys = ['id', 'name', 'description', 'is_active', 'created_at', 'updated_at', 'deleted_at'];
+        $this->assertEqualsCanonicalizing($expectedKeys, $categoryKeys);
     }
 
-    public function testFillableAttribute()
+    public function testCreate()
     {
-        $expectedFillables = ['name', 'description', 'is_active'];
-        foreach ($expectedFillables as $expectedFillable) {
-            $this->assertContains($expectedFillable, $this->category->getFillable());
+        $category = Category::create(['name' => 'test'])->refresh();
+        $this->assertTrue(Uuid::isValid($category->id));
+        $this->assertEquals('test', $category->name);
+        $this->assertNull($category->description);
+        $this->assertTrue($category->is_active);
+        
+        $category = Category::create(['name' => 'test', 'description' => null])->refresh();
+        $this->assertNull($category->description);
+        
+        $category = Category::create(['name' => 'test', 'description' => 'description3'])->refresh();
+        $this->assertEquals('description3', $category->description);
+        
+        $category = Category::create(['name' => 'test', 'is_active' => false])->refresh();
+        $this->assertFalse($category->is_active);
+        
+        $category = Category::create(['name' => 'test', 'is_active' => true])->refresh();
+        $this->assertTrue($category->is_active);
+    }
+    
+    public function testUpdate()
+    {
+        $category = Category::factory()->create(['is_active' => false]);
+        $data = ['name' => 'test_name_updated', 'description' => 'test_description_updated', 'is_active' => true];
+        $category->update($data);
+        foreach ($data as $key => $value) {
+            $this->assertEquals($value, $category->{$key});
         }
-        $this->assertCount(count($expectedFillables), $this->category->getFillable());
     }
-
-    public function testCastsAttribute()
+    
+    public function testDelete()
     {
-        $expectedCasts = ['id' => 'string', 'deleted_at' => 'datetime'];
-        foreach ($expectedCasts as $expectedCast) {
-            $this->assertContains($expectedCast, $this->category->getCasts());
-        }
-        $this->assertCount(count($expectedCasts), $this->category->getCasts());
-    }
-
-    public function testDatesAttribute()
-    {
-        $expectedDates = ['deleted_at', 'created_at', 'updated_at'];
-        foreach ($expectedDates as $expectedDate) {
-            $this->assertContains($expectedDate, $this->category->getDates());
-        }
-        $this->assertCount(count($expectedDates), $this->category->getDates());
-    }
-
-    public function testIncrementingAttribute()
-    {
-        $expectedIncrementing = false;
-        $this->assertEquals($expectedIncrementing, $this->category->getIncrementing());
-    }
-
-    public function testIfUseTraits()
-    {
-        $expectedTraits = [SoftDeletes::class, HasFactory::class, Uuid::class, Writable::class];
-        $categoryTraits = class_uses(Category::class);
-        foreach ($expectedTraits as $expectedTrait) {
-            $this->assertContains($expectedTrait, $categoryTraits);
-        }
-        $this->assertCount(count($expectedTraits), $categoryTraits);
+        /** @var Category $category */
+        $category = Category::factory()->create();
+        $id = $category->id;
+        $category->delete();
+        $this->assertNull(Category::find($id));
+        $trashed = Category::onlyTrashed()->find($id);
+        $this->assertInstanceOf(Category::class, $trashed);
+        $this->assertNotNull($trashed->deleted_at);
     }
 
 }

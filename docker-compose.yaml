@@ -4,15 +4,15 @@ services:
   app:
     image: melquiadesrodrigues/php-compose:8.0.6-fpm-alpine3.13
     container_name: micro-videos-app
-    entrypoint: dockerize -template ./.docker/app/.env.template:.env -wait tcp://mysql:3306 -timeout 40s ./.docker/app/entrypoint.sh
+    entrypoint: dockerize -template ./.docker/app/.env.template:.env -template ./.docker/app/.env.phpunit:.env.phpunit -wait tcp://mysql:3306 -timeout 40s ./.docker/app/entrypoint.sh
     environment:
       _DB_HOST: "mysql"
+      _DB_TESTS_HOST: "mysql-tests"
       _DB_DATABASE: "code_micro_videos"
       _DB_USERNAME: "root"
       _DB_PASSWORD: "12345"
-    #  XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9001 remote_enable=1 xdebug.remote_autostart=1 remote_handler=dbgp xdebug.remote_log=/var/log/xdebug.log
-    ports:
-      - "9001:9001"
+      XDEBUG_CONFIG: remote_host=host.docker.internal idekey=docker-xdebug remote_port=9001 remote_enable=1 xdebug.remote_autostart=1 remote_handler=dbgp xdebug.remote_log=/var/log/xdebug.log
+      PHP_IDE_CONFIG: "serverName=xdebug-docker"
     volumes:
       - .:/var/www
     networks:
@@ -42,13 +42,27 @@ services:
   mysql:
     build: ./.docker/mysql
     command: --innodb-use-native-aio=0
-    container_name: micro-videos-mysql
+    container_name: micro-videos-mysql-tests
     restart: always
     tty: true
     ports:
       - "33060:3306"
     volumes:
       - ./.docker/mysql/dbdata:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: 'code_micro_videos'
+      MYSQL_ROOT_PASSWORD: '12345'
+    networks:
+      - codeflix-micro-videos
+      
+  mysql-tests:
+    build: ./.docker/mysql
+    command: --innodb-use-native-aio=0
+    container_name: micro-videos-mysql
+    restart: always
+    tty: true
+    ports:
+      - "33061:3306"
     environment:
       MYSQL_DATABASE: 'code_micro_videos'
       MYSQL_ROOT_PASSWORD: '12345'
