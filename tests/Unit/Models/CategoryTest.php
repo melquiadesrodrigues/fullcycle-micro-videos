@@ -2,52 +2,52 @@
 
 namespace Tests\Unit\Models;
 
-use App\Models\Category;
+use App\Models\Genre;
 use App\Models\Traits\Uuid;
 use App\Models\Traits\Writable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tests\TestCase;
 
-class CategoryTest extends TestCase
+class GenreTest extends TestCase
 {
-    private Category $category;
+    private Genre $genre;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->category = new Category();
+        $this->genre = new Genre();
     }
 
     public function testFillableAttribute()
     {
-        $expectedFillables = ['name', 'description', 'is_active'];
-        $this->assertEqualsCanonicalizing($expectedFillables, $this->category->getFillable());
+        $expectedFillables = ['name', 'is_active'];
+        $this->assertEqualsCanonicalizing($expectedFillables, $this->genre->getFillable());
     }
 
     public function testCastsAttribute()
     {
         $expectedCasts = ['id' => 'string', 'deleted_at' => 'datetime', 'is_active' => 'boolean'];
-        $this->assertEqualsCanonicalizing($expectedCasts, $this->category->getCasts());
+        $this->assertEqualsCanonicalizing($expectedCasts, $this->genre->getCasts());
     }
 
     public function testDatesAttribute()
     {
         $expectedDates = ['deleted_at', 'created_at', 'updated_at'];
-        $this->assertEqualsCanonicalizing($expectedDates, $this->category->getDates());
+        $this->assertEqualsCanonicalizing($expectedDates, $this->genre->getDates());
     }
 
     public function testIncrementingAttribute()
     {
         $expectedIncrementing = false;
-        $this->assertEquals($expectedIncrementing, $this->category->getIncrementing());
+        $this->assertEquals($expectedIncrementing, $this->genre->getIncrementing());
     }
 
     public function testIfUseTraits()
     {
         $expectedTraits = [SoftDeletes::class, HasFactory::class, Uuid::class, Writable::class];
-        $categoryTraits = class_uses(Category::class);
-        $this->assertEqualsCanonicalizing($expectedTraits, $categoryTraits);
+        $genreTraits = class_uses(Genre::class);
+        $this->assertEqualsCanonicalizing($expectedTraits, $genreTraits);
     }
 
 }
