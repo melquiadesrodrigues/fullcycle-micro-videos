@@ -11,8 +11,8 @@ services:
       _DB_DATABASE: "code_micro_videos"
       _DB_USERNAME: "root"
       _DB_PASSWORD: "12345"
-    ports:
-        - "9001:9001"
+    #ports:
+    #    - "9001:9001"
     volumes:
       - .:/var/www
     #  - ./.docker/app/docker-xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
@@ -23,9 +23,8 @@ services:
       - redis
 
   nginx:
-    image: nginx:stable-alpine
+    image: melquiadesrodrigues/nginx:stable-alpine
     container_name: micro-videos-nginx
-    entrypoint: ./.docker/nginx/entrypoint.sh
     restart: always
     tty: true
     ports:
@@ -42,7 +41,7 @@ services:
       - app
 
   mysql:
-    image: mysql:5.7
+    image: melquiadesrodrigues/mysql:5.7
     command: --innodb-use-native-aio=0
     container_name: micro-videos-mysql-tests
     restart: always
@@ -58,7 +57,7 @@ services:
       - codeflix-micro-videos
       
   mysql-tests:
-    image: mysql:5.7
+    image: melquiadesrodrigues/mysql:5.7
     command: --innodb-use-native-aio=0
     container_name: micro-videos-mysql
     restart: always
