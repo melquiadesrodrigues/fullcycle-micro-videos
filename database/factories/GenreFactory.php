@@ -10,7 +10,7 @@ class GenreFactory extends Factory
 {
     protected $model = Genre::class;
 
-    #[ArrayShape(['name' => "string", 'description' => "null|string"])] public function definition(): array
+    #[ArrayShape(['name' => "string"])] public function definition(): array
     {
         return [
             'name' => $this->faker->colorName,
